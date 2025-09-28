@@ -23,6 +23,8 @@ services:
     runtime: python
     # Tell Render to only look in the 'backend' folder
     rootDir: ./backend
+    # Specify a compatible Python version
+    pythonVersion: "3.11"
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /health # A simple endpoint to check if the app is running
@@ -41,3 +43,4 @@ services:
         sync: false # Set this to 'false' so you have to add it manually in the dashboard for security
       - key: SECRET_KEY
         generateValue: true # Let Render generate a random secret key
+
