@@ -1,0 +1,43 @@
+# render.yaml
+# This file tells Render how to set up all the services for CrewNexus automatically.
+# 1. Create a new "Blueprint" on Render.
+# 2. Connect your GitHub repository.
+# 3. Render will find this file and set everything up for you.
+
+services:
+  # The PostgreSQL Database
+  - type: pserv
+    name: crewnexus-db
+    runtime: postgres
+    postgres:
+      version: "14"
+
+  # The Redis Cache
+  - type: pserv
+    name: crewnexus-redis
+    runtime: redis
+
+  # The FastAPI Backend Web Service
+  - type: web
+    name: crewnexus-backend
+    runtime: python
+    # Tell Render to only look in the 'backend' folder
+    rootDir: ./backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health # A simple endpoint to check if the app is running
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: crewnexus-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: crewnexus-redis
+          property: connectionString
+      - key: CEREBRAS_API_KEY
+        sync: false # Set this to 'false' so you have to add it manually in the dashboard for security
+      - key: SECRET_KEY
+        generateValue: true # Let Render generate a random secret key
